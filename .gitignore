@@ -1,1 +1,15 @@
-# gitignore 
+# Build results
+x64/
+Debug/
+Release/
+
+# Visual Studio files
+.vs/
+*.user
+*.suo
+
+# Compiled files
+*.exe
+*.obj
+*.pdb
+*.ilk
