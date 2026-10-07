@@ -1,0 +1,36 @@
+#version 430
+
+layout(local_size_x = 256) in;          
+
+layout(std430, binding = 0) buffer Particles {
+    vec4 data[];  // [pos|m], [vel|fixed], [newP|pad]
+};
+
+uniform float dt;
+uniform int numParticles;
+
+void main() {
+// id
+    int id = int(gl_GlobalInvocationID.x);
+    int base = id * 3;
+    
+    if (id >= numParticles) return;  
+    
+    vec4 posM    = data[base + 0];   // xyz=pos, w=mass
+    vec4 velF    = data[base + 1];   // xyz=vel, w=fixed
+    
+    vec3 pos   = posM.xyz;
+    vec3 vel   = velF.xyz;
+    float isFixed = velF.w;
+
+    if (isFixed == 0.0) {
+        vel += vec3(0, -980, 0) * dt;
+        vel *= 0.99;  // 1 + k_air
+        vec3 newP = pos + vel * dt;
+
+        data[base + 1] = vec4(vel, isFixed);
+        data[base + 2] = vec4(newP, 0.0);
+    } else {
+        data[base + 2] = vec4(pos, 0.0);
+    }
+}
